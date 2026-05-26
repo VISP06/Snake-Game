@@ -10,6 +10,6 @@ import java.io.IOException;
 public class SnakeGame extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-
+        System.out.println("Hello World");
     }
 }
