@@ -14,8 +14,10 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class SnakeGame extends Application {
     private static final int WIDTH = 600;
@@ -24,8 +26,9 @@ public class SnakeGame extends Application {
     //variables responsible for movement of snake
     List<Point> snake = new ArrayList<>();
 
-    private static int foodX = 200;
-    private static int foodY = 200;
+    private static final Random random = new Random();
+    private static int foodX = random.nextInt(0, (WIDTH/30))*30;
+    private static int foodY = random.nextInt(0, (WIDTH/30))*30;
 
     private static Direction currentDirection = Direction.RIGHT;
     @Override
@@ -42,7 +45,7 @@ public class SnakeGame extends Application {
         timeline.play();
 
         KeyFrame frame = new KeyFrame(Duration.millis(150), e -> {
-            update();      // Calculate new positions
+            update(timeline);      // Calculate new positions
             draw(graphicsContext); // Paint the new positions
         });
 
@@ -79,27 +82,36 @@ public class SnakeGame extends Application {
         gc.setFill(Color.CRIMSON);
         gc.fillOval(foodX, foodY, 30, 30);
     }
-    private void update(){
+    private void update(Timeline tl){
         Point head = snake.get(0);
-        int nextY = head.y();
-        int nextX = head.x();
+        int headY = head.y();
+        int headX = head.x();
 
         switch(currentDirection){
-            case UP -> nextY -= 30;
-            case DOWN -> nextY += 30;
-            case RIGHT -> nextX += 30;
-            case LEFT -> nextX -= 30;
+            case UP -> headY -= 30;
+            case DOWN -> headY += 30;
+            case RIGHT -> headX += 30;
+            case LEFT -> headX -= 30;
         }
 
-        Point newHead = new Point(nextX, nextY);
-
-        if(nextX>=WIDTH|| nextY>=HEIGHT){
-            //terminate game
+        Point newHead = new Point(headX, headY);
+        for(Point p:snake) {
+            if (newHead.x() == p.x() && newHead.y() == p.y()) {
+                tl.stop();
+                return;
+            }
         }
-        if(nextX == foodX && nextY == foodY){
-            //increase size of snake
+        snake.add(0, newHead);
+
+        if(headX == foodX && headY == foodY){
+            foodX = random.nextInt(0, (WIDTH/30))*30;
+            foodY = random.nextInt(0, (WIDTH/30))*30;
+        }else{
+            snake.remove(snake.size()-1);
+        }
+
+        if(headX>=WIDTH|| headY>=HEIGHT || headX < 0 || headY < 0){
+            tl.stop();
         }
     }
 }
-
-
