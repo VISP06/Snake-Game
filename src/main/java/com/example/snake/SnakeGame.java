@@ -5,15 +5,20 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.awt.*;
 import java.io.IOException;
+import java.lang.classfile.Label;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,27 +36,40 @@ public class SnakeGame extends Application {
     private static int foodY = random.nextInt(0, (WIDTH/30))*30;
 
     private static Direction currentDirection = Direction.RIGHT;
+    private static GameState currentGameState = GameState.MENU;
     @Override
     public void start(Stage stage) throws IOException {
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
-        //color of the game board
-        graphicsContext.setFill(Color.BLACK);
-        graphicsContext.fillRect(0, 0, WIDTH, HEIGHT);
+        if(currentGameState == GameState.MENU){
+            VBox box = new VBox();
+            box.setAlignment(Pos.CENTER);
+            box.setSpacing(30);
+            Text title = new Text("Jungle Snake");
+            Button startButton = new Button("Start Game");
+            Button quitButton = new Button("Quit");
 
-        snake.add(new Point(300, 300));
-        final Timeline timeline = new Timeline();
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
+        } else if(currentGameState == GameState.PLAYING) {
+            //color of the game board
+            graphicsContext.setFill(Color.BLACK);
+            graphicsContext.fillRect(0, 0, WIDTH, HEIGHT);
 
-        KeyFrame frame = new KeyFrame(Duration.millis(150), e -> {
-            update(timeline);      // Calculate new positions
-            draw(graphicsContext); // Paint the new positions
-        });
+            snake.add(new Point(300, 300));
+            final Timeline timeline = new Timeline();
+            timeline.setCycleCount(Animation.INDEFINITE);
+            timeline.play();
 
-        timeline.getKeyFrames().add(frame);
-        timeline.play();
+            KeyFrame frame = new KeyFrame(Duration.millis(150), e -> {
+                update(timeline);      // Calculate new positions
+                draw(graphicsContext); // Paint the new positions
+            });
 
+            timeline.getKeyFrames().add(frame);
+            timeline.play();
+
+        }else{
+
+        }
 
         Group group = new Group(canvas);
         Scene scene = new Scene(group, WIDTH, HEIGHT);
@@ -86,6 +104,12 @@ public class SnakeGame extends Application {
         Point head = snake.get(0);
         int headY = head.y();
         int headX = head.x();
+
+        if(currentGameState == GameState.MENU || currentGameState == GameState.GAME_OVER){
+            return;
+        }else{
+
+        }
 
         switch(currentDirection){
             case UP -> headY -= 30;
