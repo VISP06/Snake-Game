@@ -14,13 +14,15 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SnakeGame extends Application {
     private static final int WIDTH = 600;
     private static final int HEIGHT = 600;
+
     //variables responsible for movement of snake
-    private static int snakeX = 300;
-    private static int snakeY = 300;
+    List<Point> snake = new ArrayList<>();
 
     private static int foodX = 200;
     private static int foodY = 200;
@@ -34,7 +36,7 @@ public class SnakeGame extends Application {
         graphicsContext.setFill(Color.BLACK);
         graphicsContext.fillRect(0, 0, WIDTH, HEIGHT);
 
-
+        snake.add(new Point(300, 300));
         final Timeline timeline = new Timeline();
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
@@ -52,10 +54,10 @@ public class SnakeGame extends Application {
         Scene scene = new Scene(group, WIDTH, HEIGHT);
         scene.setOnKeyPressed(event-> {
             switch (event.getCode()){
-                case UP: currentDirection = Direction.UP; break;
-                case DOWN: currentDirection = Direction.DOWN; break;
-                case RIGHT: currentDirection = Direction.RIGHT; break;
-                case LEFT : currentDirection = Direction.LEFT; break;
+                case UP : if(currentDirection != Direction.DOWN) currentDirection = Direction.UP; break;
+                case DOWN : if(currentDirection != Direction.UP) currentDirection = Direction.DOWN; break;
+                case RIGHT : if(currentDirection != Direction.LEFT) currentDirection = Direction.RIGHT; break;
+                case LEFT : if(currentDirection != Direction.RIGHT) currentDirection = Direction.LEFT; break;
             }
         });
         stage.setScene(scene);
@@ -69,24 +71,33 @@ public class SnakeGame extends Application {
 
         //snake
         gc.setFill(Color.DARKSEAGREEN);
-        gc.fillRect(snakeX, snakeY, 30, 30);
+        for(Point p:snake){
+            gc.fillRect(p.x(), p.y(), 30, 30);
+        }
 
         //apple
         gc.setFill(Color.CRIMSON);
         gc.fillOval(foodX, foodY, 30, 30);
     }
     private void update(){
-        if(snakeX == WIDTH || snakeY == HEIGHT){
+        Point head = snake.get(0);
+        int nextY = head.y();
+        int nextX = head.x();
+
+        switch(currentDirection){
+            case UP -> nextY -= 30;
+            case DOWN -> nextY += 30;
+            case RIGHT -> nextX += 30;
+            case LEFT -> nextX -= 30;
+        }
+
+        Point newHead = new Point(nextX, nextY);
+
+        if(nextX>=WIDTH|| nextY>=HEIGHT){
             //terminate game
         }
-        if(snakeX == foodX && snakeY == foodY){
+        if(nextX == foodX && nextY == foodY){
             //increase size of snake
-        }
-        switch(currentDirection){
-            case UP -> snakeY += 30;
-            case DOWN -> snakeY -= 30;
-            case RIGHT -> snakeX += 30;
-            case LEFT -> snakeX -= 30;
         }
     }
 }
