@@ -4,19 +4,24 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.awt.*;
+
+import javax.swing.*;
 import java.io.IOException;
 import java.lang.classfile.Label;
 import java.sql.Time;
@@ -31,6 +36,9 @@ public class SnakeGame extends Application {
     //variables responsible for movement of snake
     List<Point> snake = new ArrayList<>();
 
+    //apple
+    private Image appleImage;
+
     private static final Random random = new Random();
     private static int foodX = random.nextInt(0, (WIDTH/30))*30;
     private static int foodY = random.nextInt(0, (WIDTH/30))*30;
@@ -39,17 +47,30 @@ public class SnakeGame extends Application {
     private static GameState currentGameState = GameState.MENU;
     @Override
     public void start(Stage stage) throws IOException {
+        //we want apple image to get loaded only once
+        appleImage = new Image(
+                getClass().getResourceAsStream("/com.example.snake/apple_art.png")
+        );
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
-        if(currentGameState == GameState.MENU){
+            //MENU SCREEN
             VBox box = new VBox();
             box.setAlignment(Pos.CENTER);
             box.setSpacing(30);
             Text title = new Text("Jungle Snake");
-            Button startButton = new Button("Start Game");
-            Button quitButton = new Button("Quit");
 
-        } else if(currentGameState == GameState.PLAYING) {
+            Button startButton = new Button("Start Game");
+            startButton.setOnAction(e->{
+
+            });
+
+            Button quitButton = new Button("Quit");
+            quitButton.setOnAction(e->{
+
+            });
+            box.getChildren().addAll(title);
+            //END
+
             //color of the game board
             graphicsContext.setFill(Color.BLACK);
             graphicsContext.fillRect(0, 0, WIDTH, HEIGHT);
@@ -67,9 +88,13 @@ public class SnakeGame extends Application {
             timeline.getKeyFrames().add(frame);
             timeline.play();
 
-        }else{
 
-        }
+            Text deathScreen = new Text("You DIED!");
+            Button retryButton = new Button("Retry");
+            retryButton.setOnAction(e->{
+
+            });
+
 
         Group group = new Group(canvas);
         Scene scene = new Scene(group, WIDTH, HEIGHT);
@@ -95,10 +120,8 @@ public class SnakeGame extends Application {
         for(Point p:snake){
             gc.fillRect(p.x(), p.y(), 30, 30);
         }
-
-        //apple
-        gc.setFill(Color.CRIMSON);
-        gc.fillOval(foodX, foodY, 30, 30);
+        //drawing apple
+        gc.drawImage(appleImage, foodX, foodY, 30, 30);
     }
     private void update(Timeline tl){
         Point head = snake.get(0);
@@ -119,6 +142,7 @@ public class SnakeGame extends Application {
         }
 
         Point newHead = new Point(headX, headY);
+        //we keep checking whether the snake collides with any part of its body
         for(Point p:snake) {
             if (newHead.x() == p.x() && newHead.y() == p.y()) {
                 tl.stop();
@@ -127,6 +151,7 @@ public class SnakeGame extends Application {
         }
         snake.add(0, newHead);
 
+        //if the snake eats an apple
         if(headX == foodX && headY == foodY){
             foodX = random.nextInt(0, (WIDTH/30))*30;
             foodY = random.nextInt(0, (WIDTH/30))*30;
@@ -134,6 +159,7 @@ public class SnakeGame extends Application {
             snake.remove(snake.size()-1);
         }
 
+        //if the snake hits anyone of the 4 corners, the game concludes
         if(headX>=WIDTH|| headY>=HEIGHT || headX < 0 || headY < 0){
             tl.stop();
         }
