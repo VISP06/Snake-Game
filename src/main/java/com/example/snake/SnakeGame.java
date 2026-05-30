@@ -11,9 +11,11 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -33,6 +35,10 @@ public class SnakeGame extends Application {
 
     //apple
     private Image appleImage;
+    //menu background image
+    private Image menuBackground;
+
+    private Font pixelFont;
 
     private static final Random random = new Random();
     private static int foodX = random.nextInt(0, (WIDTH / 30)) * 30;
@@ -53,7 +59,7 @@ public class SnakeGame extends Application {
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
 
-        VBox menuBox = createMenu(canvas);
+        StackPane menuBox = createMenu(canvas);
 
         setupGameEngine(graphicsContext);
 
@@ -74,34 +80,70 @@ public class SnakeGame extends Application {
         appleImage = new Image(
                 getClass().getResourceAsStream("/com/example/snake/apple_art.png")
         );
-
+        menuBackground = new Image(
+                getClass().getResourceAsStream("/com/example/snake/menu_background.jpg")
+        );
+        pixelFont = Font.loadFont(
+                getClass().getResourceAsStream("/fonts/Minecraftia-Regular.ttf"),
+                24
+        );
     }
 
-    private VBox createMenu(Canvas canvas) {
+    private StackPane createMenu(Canvas canvas) {
 
         //MENU SCREEN
-        VBox box = new VBox();
-        box.setAlignment(Pos.CENTER);
-        box.setSpacing(30);
 
-        Text title = new Text("Jungle Snake");
+        ImageView background = new ImageView(menuBackground);
+        background.setFitWidth(WIDTH);
+        background.setFitHeight(HEIGHT);
+        background.setPreserveRatio(false);
 
-        Button startButton = new Button("Start Game");
+        VBox controls = new VBox();
+        controls.setAlignment(Pos.CENTER);
+        controls.setSpacing(25);
+
+        StackPane menuPane = new StackPane(background, controls);
+
+        Text title = new Text("JUNGLE\nSNAKE");
+        title.setFont(Font.font(pixelFont.getFamily(), 42));
+
+        title.setFill(Color.WHITE);
+        title.setStroke(Color.web("#32CD32"));
+        title.setStrokeWidth(3);
+
+        Button startButton = new Button("START GAME");
+        startButton.setPrefSize(220, 50);
+
+        String buttonStyle =
+                "-fx-background-color: #A0520D;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-family: '" + pixelFont.getFamily() + "';" +
+                        "-fx-font-size: 14;" +
+                        "-fx-border-color: white;" +
+                        "-fx-border-width: 2;";
+
+        startButton.setStyle(buttonStyle);
+
         startButton.setOnAction(e -> {
             currentGameState = GameState.PLAYING;
-            box.setVisible(false);
+            menuPane.setVisible(false);
             canvas.requestFocus();
         });
 
-        Button quitButton = new Button("Quit");
+        Button quitButton = new Button("QUIT");
+        quitButton.setPrefSize(220, 50);
+        quitButton.setStyle(buttonStyle);
+
         quitButton.setOnAction(e -> {
             Platform.exit();
         });
 
-        box.getChildren().addAll(title, startButton, quitButton);
-        //END
-
-        return box;
+        controls.getChildren().addAll(
+                title,
+                startButton,
+                quitButton
+        );
+        return menuPane;
     }
 
     private void setupGameEngine(GraphicsContext graphicsContext) {
