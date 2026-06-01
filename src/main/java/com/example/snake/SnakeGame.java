@@ -98,11 +98,11 @@ public class SnakeGame extends Application {
         background.setFitHeight(HEIGHT);
         background.setPreserveRatio(false);
 
-        VBox controls = new VBox();
-        controls.setAlignment(Pos.CENTER);
-        controls.setSpacing(25);
+        VBox menuOptions = new VBox();
+        menuOptions.setAlignment(Pos.CENTER);
+        menuOptions.setSpacing(25);
 
-        StackPane menuPane = new StackPane(background, controls);
+        StackPane menuPane = new StackPane(background, menuOptions);
 
         Text title = new Text("JUNGLE\nSNAKE");
         title.setFont(Font.font(pixelFont.getFamily(), 42));
@@ -138,7 +138,7 @@ public class SnakeGame extends Application {
             Platform.exit();
         });
 
-        controls.getChildren().addAll(
+        menuOptions.getChildren().addAll(
                 title,
                 startButton,
                 quitButton
