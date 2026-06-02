@@ -23,9 +23,13 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class SnakeGame extends Application {
+    private static int scoreCount = 0;
+    //for death screen
+    private static Text finalScore;
 
     private static final int WIDTH = 600;
     private static final int HEIGHT = 600;
@@ -48,6 +52,7 @@ public class SnakeGame extends Application {
     private static GameState currentGameState = GameState.MENU;
 
     private static VBox deathBox;
+    private static StackPane menuPane;
 
     private Timeline timeline;
 
@@ -78,10 +83,10 @@ public class SnakeGame extends Application {
     private void loadAssets() {
         //we want apple image to get loaded only once
         appleImage = new Image(
-                getClass().getResourceAsStream("/com/example/snake/apple_art.png")
+                Objects.requireNonNull(getClass().getResourceAsStream("/com/example/snake/apple_art.png"))
         );
         menuBackground = new Image(
-                getClass().getResourceAsStream("/com/example/snake/menu_background.jpg")
+                Objects.requireNonNull(getClass().getResourceAsStream("/com/example/snake/menu_background.jpg"))
         );
         pixelFont = Font.loadFont(
                 getClass().getResourceAsStream("/fonts/Minecraftia-Regular.ttf"),
@@ -102,7 +107,7 @@ public class SnakeGame extends Application {
         menuOptions.setAlignment(Pos.CENTER);
         menuOptions.setSpacing(25);
 
-        StackPane menuPane = new StackPane(background, menuOptions);
+        menuPane = new StackPane(background, menuOptions);
 
         Text title = new Text("JUNGLE\nSNAKE");
         title.setFont(Font.font(pixelFont.getFamily(), 42));
@@ -127,6 +132,14 @@ public class SnakeGame extends Application {
         startButton.setOnAction(e -> {
             currentGameState = GameState.PLAYING;
             menuPane.setVisible(false);
+            //reset score count
+            scoreCount = 0;
+            //resetting the snake for when user goes GAME_OVER -> EXIT -> START
+            snake.clear();
+            snake.add(new Point(300, 300));
+            currentDirection = Direction.RIGHT;
+
+            timeline.play();
             canvas.requestFocus();
         });
 
@@ -166,14 +179,23 @@ public class SnakeGame extends Application {
     }
 
     private void createDeathScreen(Canvas canvas) {
-
         //GAME_OVER SCREEN
-        Text deathScreen = new Text("You DIED!");
+        Text deathMessage = new Text("You DIED!");
+        deathMessage.setFont(Font.font("Arial", FontWeight.BOLD, 36));
+        deathMessage.setFill(Color.CRIMSON);
+
+        finalScore = new Text();
+        finalScore.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 24));
+        finalScore.setFill(Color.GOLDENROD);
+
 
         Button retryButton = new Button("Retry");
         retryButton.setOnAction(e -> {
 
             currentGameState = GameState.PLAYING;
+
+            //reset score count
+            scoreCount = 0;
 
             //resetting the snake
             snake.clear();
@@ -189,7 +211,28 @@ public class SnakeGame extends Application {
             canvas.requestFocus();
         });
 
-        deathBox = new VBox(deathScreen, retryButton);
+        Button quitButton = new Button("Exit");
+        quitButton.setOnAction(e->{
+           deathBox.setVisible(false);
+           menuPane.setVisible(true);
+        });
+        String jungleButtonStyle =
+                "-fx-background-color: linear-gradient(to bottom, #7d8271 0%, #6b705f 40%, #565a4d 100%);" +
+                        "-fx-border-color: #c0c4b4 #303228 #303228 #c0c4b4;" +
+                        "-fx-border-width: 2;" +
+                        "-fx-text-fill: #f2f4e8;" +
+                        "-fx-font-family: 'Minecraftia';" +
+                        "-fx-font-size: 16;" +
+                        "-fx-background-radius: 0;" +
+                        "-fx-border-radius: 0;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 6, 0, 2, 2);";
+        quitButton.setStyle(jungleButtonStyle);
+        retryButton.setStyle(jungleButtonStyle);
+        HBox hBox = new HBox(retryButton, quitButton);
+        hBox.setAlignment(Pos.CENTER);
+        hBox.setSpacing(20);
+
+        deathBox = new VBox(deathMessage, finalScore, hBox);
         deathBox.setAlignment(Pos.CENTER);
         deathBox.setVisible(false);
         deathBox.setSpacing(30);
@@ -224,10 +267,14 @@ public class SnakeGame extends Application {
     }
 
     private void draw(GraphicsContext gc) {
-
         //color of the game board
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, WIDTH, HEIGHT);
+
+        //scoreboard
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font(20));
+        gc.fillText("Score: "+scoreCount, WIDTH-100, 30);
 
         //snake
         gc.setFill(Color.DARKSEAGREEN);
@@ -262,6 +309,7 @@ public class SnakeGame extends Application {
         for (Point p : snake) {
             if (newHead.x() == p.x() && newHead.y() == p.y()) {
                 currentGameState = GameState.GAME_OVER;
+                finalScore.setText("Final Score is " + scoreCount);
                 deathBox.setVisible(true);
                 tl.stop();
                 return;
@@ -273,6 +321,8 @@ public class SnakeGame extends Application {
 
         //if the snake eats an apple
         if (headX == foodX && headY == foodY) {
+            //increment score counter
+            scoreCount++;
             //we don't need to get rid of a block from the back in this case as the size has actually increased
             foodX = random.nextInt(0, (WIDTH / 30)) * 30;
             foodY = random.nextInt(0, (WIDTH / 30)) * 30;
@@ -281,8 +331,9 @@ public class SnakeGame extends Application {
         }
 
         //if the snake hits anyone of the 4 corners, the game concludes
-        if (headX > WIDTH || headY > HEIGHT || headX < 0 || headY < 0) {
+        if (headX >= WIDTH || headY >= HEIGHT || headX < 0 || headY < 0){
             currentGameState = GameState.GAME_OVER;
+            finalScore.setText("Final Score is " + scoreCount);
             deathBox.setVisible(true);
             tl.stop();
         }
