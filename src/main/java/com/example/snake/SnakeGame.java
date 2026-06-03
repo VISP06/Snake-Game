@@ -181,11 +181,11 @@ public class SnakeGame extends Application {
     private void createDeathScreen(Canvas canvas) {
         //GAME_OVER SCREEN
         Text deathMessage = new Text("You DIED!");
-        deathMessage.setFont(Font.font("Arial", FontWeight.BOLD, 36));
+        deathMessage.setFont(Font.font(pixelFont.getFamily(), FontWeight.BOLD, 36));
         deathMessage.setFill(Color.CRIMSON);
 
         finalScore = new Text();
-        finalScore.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 24));
+        finalScore.setFont(Font.font(pixelFont.getFamily(), FontWeight.SEMI_BOLD, 24));
         finalScore.setFill(Color.GOLDENROD);
 
 
@@ -226,6 +226,7 @@ public class SnakeGame extends Application {
                         "-fx-background-radius: 0;" +
                         "-fx-border-radius: 0;" +
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 6, 0, 2, 2);";
+
         quitButton.setStyle(jungleButtonStyle);
         retryButton.setStyle(jungleButtonStyle);
         HBox hBox = new HBox(retryButton, quitButton);
